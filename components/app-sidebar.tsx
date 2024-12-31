@@ -2,15 +2,10 @@
 
 import * as React from "react"
 import {
-  AudioWaveform,
   BookOpen,
-  Bot,
   Command,
-  Frame,
   GalleryVerticalEnd,
   Home,
-  Map,
-  PieChart,
   Settings2,
   SquareTerminal,
 } from "lucide-react"
@@ -51,26 +46,22 @@ const data = {
       nav: [
         {
           title: "Home",
-          url: "",
+          url: "/",
           icon: Home
         },
         {
-          title: "Playground",
-          url: "#",
+          title: "Scripts",
+          url: "/scripts",
           icon: SquareTerminal,
           items: [
             {
-              title: "History",
-              url: "#",
+              title: "Listagem",
+              url: "/scripts",
             },
             {
-              title: "Starred",
-              url: "#",
-            },
-            {
-              title: "Settings",
-              url: "#",
-            },
+              title: "Novo",
+              url: "/scripts/new",
+            }
           ],
         },
         {

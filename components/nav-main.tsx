@@ -41,11 +41,11 @@ export function NavMain({navMain} :NavMainProps) {
   return (
     <Fragment>
       {navMain.map((items) => (
-        <SidebarGroup>
+        <SidebarGroup key={items.navGroup}>
           <SidebarGroupLabel>{items.navGroup}</SidebarGroupLabel>
           <SidebarMenu>
             {items.nav.map((item) => (
-              <Fragment>
+              <Fragment key={item.title}>
                 {item.items ? 
                 (
                   <Collapsible
