@@ -13,17 +13,13 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, MoreHorizontal, Plus } from "lucide-react"
+import { ArrowUpDown, ChevronDown, Pencil, Plus } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
@@ -36,143 +32,164 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import Link from "next/link"
+import { useRouter } from 'next/navigation'
 
 const data: Payment[] = [
   {
-    id: "m5gr84i9",
-    amount: 316,
-    status: "success",
-    email: "ken99@yahoo.com",
+    id: 1,
+    name: "Movimentação Óbito",
+    type: "SELECT",
+    expectedReturn: null,
+    sql: "SELECT FROM sgm_paciente",
+    createdTime: "2024-12-27 17:41:03",
+    updatedTime: "2024-12-27 17:41:03"
   },
   {
-    id: "3u1reuv4",
-    amount: 242,
-    status: "success",
-    email: "Abe45@gmail.com",
+    id: 2,
+    name: "Movimentação Óbito",
+    type: "SELECT",
+    expectedReturn: null,
+    sql: "SELECT FROM sgm_paciente",
+    createdTime: "2024-12-27 17:41:03",
+    updatedTime: "2024-12-27 17:41:03"
   },
   {
-    id: "derv1ws0",
-    amount: 837,
-    status: "processing",
-    email: "Monserrat44@gmail.com",
+    id: 3,
+    name: "Movimentação Óbito",
+    type: "SELECT",
+    expectedReturn: null,
+    sql: "SELECT FROM sgm_paciente",
+    createdTime: "2024-12-27 17:41:03",
+    updatedTime: "2024-12-27 17:41:03"
   },
   {
-    id: "5kma53ae",
-    amount: 874,
-    status: "success",
-    email: "Silas22@gmail.com",
-  },
-  {
-    id: "bhqecj4p",
-    amount: 721,
-    status: "failed",
-    email: "carmella@hotmail.com",
+    id: 4,
+    name: "Movimentação Óbito",
+    type: "SELECT",
+    expectedReturn: null,
+    sql: "SELECT FROM sgm_paciente",
+    createdTime: "2024-12-27 17:41:03",
+    updatedTime: "2024-12-27 17:41:03"
   },
 ]
 
 export type Payment = {
-  id: string
-  amount: number
-  status: "pending" | "processing" | "success" | "failed"
-  email: string
+  id: number;
+  name: string;
+  type: string;
+  expectedReturn: number | null;
+  sql: string;
+  createdTime: string;
+  updatedTime: string;
 }
 
-export const columns: ColumnDef<Payment>[] = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("status")}</div>
-    ),
-  },
-  {
-    accessorKey: "email",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Email
-          <ArrowUpDown />
-        </Button>
-      )
-    },
-    cell: ({ row }) => <div className="lowercase">{row.getValue("email")}</div>,
-  },
-  {
-    accessorKey: "amount",
-    header: () => <div className="text-right">Amount</div>,
-    cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("amount"))
 
-      // Format the amount as a dollar amount
-      const formatted = new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-      }).format(amount)
-
-      return <div className="text-right font-medium">{formatted}</div>
-    },
-  },
-  {
-    id: "actions",
-    enableHiding: false,
-    cell: ({ row }) => {
-      const payment = row.original
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(payment.id)}
-            >
-              Copy payment ID
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>View customer</DropdownMenuItem>
-            <DropdownMenuItem>View payment details</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )
-    },
-  },
-]
 
 export default function Page() {
+  const router = useRouter()
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   )
+
+  const columns: ColumnDef<Payment>[] = [
+    {
+      id: "edit",
+      header: "",
+      cell: ({ row }) => (
+        <Button variant="outline" size="icon" type="button" onClick={() => router.push(`/scripts/${row.getValue("id")}`)}>
+          <Pencil />
+        </Button>
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    },
+    {
+      accessorKey: "id",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            ID
+            <ArrowUpDown />
+          </Button>
+        )
+      },
+      cell: ({ row }) => (
+        <div className="capitalize">{row.getValue("id")}</div>
+      ),
+    },
+    {
+      accessorKey: "name",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Nome
+            <ArrowUpDown />
+          </Button>
+        )
+      },
+      cell: ({ row }) => <div>{row.getValue("name")}</div>,
+    },
+    {
+      accessorKey: "type",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Tipo
+            <ArrowUpDown />
+          </Button>
+        )
+      },
+      cell: ({ row }) => <div>{row.getValue("type")}</div>,
+    },
+    {
+      accessorKey: "sql",
+      header: "SQL",
+      cell: ({ row }) => <div>{row.getValue("sql")}</div>,
+      enableSorting: false,
+      enableHiding: false
+    },
+    {
+      accessorKey: "createdTime",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Data Inclusão
+            <ArrowUpDown />
+          </Button>
+        )
+      },
+      cell: ({ row }) => <div>{row.getValue("createdTime")}</div>,
+    },
+    {
+      accessorKey: "updatedTime",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Data Atualização
+            <ArrowUpDown />
+          </Button>
+        )
+      },
+      cell: ({ row }) => <div>{row.getValue("updatedTime")}</div>,
+    }
+  ]
+  
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
@@ -291,7 +308,7 @@ export default function Page() {
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
+      {/* <div className="flex items-center justify-end space-x-2 py-4">
         <div className="flex-1 text-sm text-muted-foreground">
           {table.getFilteredSelectedRowModel().rows.length} of{" "}
           {table.getFilteredRowModel().rows.length} row(s) selected.
@@ -314,7 +331,7 @@ export default function Page() {
             Next
           </Button>
         </div>
-      </div>
+      </div> */}
     </div>
   )
 }
