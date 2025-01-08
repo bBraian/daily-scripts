@@ -13,7 +13,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, Pencil, Plus } from "lucide-react"
+import { ArrowUpDown, ChevronDown, Plus } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -83,8 +83,6 @@ export type Payment = {
   updatedTime: string;
 }
 
-
-
 export default function Page() {
   const router = useRouter()
   const [sorting, setSorting] = React.useState<SortingState>([])
@@ -93,17 +91,6 @@ export default function Page() {
   )
 
   const columns: ColumnDef<Payment>[] = [
-    {
-      id: "edit",
-      header: "",
-      cell: ({ row }) => (
-        <Button variant="outline" size="icon" type="button" onClick={() => router.push(`/scripts/${row.getValue("id")}`)}>
-          <Pencil />
-        </Button>
-      ),
-      enableSorting: false,
-      enableHiding: false,
-    },
     {
       accessorKey: "id",
       header: ({ column }) => {
@@ -284,6 +271,8 @@ export default function Page() {
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
+                  onClick={() => router.push(`/scripts/${row.getValue("id")}`)}
+                  className="cursor-pointer"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
