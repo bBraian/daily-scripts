@@ -33,47 +33,11 @@ import {
 } from "@/components/ui/table"
 import Link from "next/link"
 import { useRouter } from 'next/navigation'
+import { data } from '../fakeData/index'
+import { Badge } from "@/components/ui/badge"
+import { formatDate } from "../lib/utils"
 
-const data: Payment[] = [
-  {
-    id: 1,
-    name: "Movimentação Óbito",
-    type: "SELECT",
-    expectedReturn: null,
-    sql: "SELECT FROM sgm_paciente",
-    createdTime: "2024-12-27 17:41:03",
-    updatedTime: "2024-12-27 17:41:03"
-  },
-  {
-    id: 2,
-    name: "Movimentação Óbito",
-    type: "SELECT",
-    expectedReturn: null,
-    sql: "SELECT FROM sgm_paciente",
-    createdTime: "2024-12-27 17:41:03",
-    updatedTime: "2024-12-27 17:41:03"
-  },
-  {
-    id: 3,
-    name: "Movimentação Óbito",
-    type: "SELECT",
-    expectedReturn: null,
-    sql: "SELECT FROM sgm_paciente",
-    createdTime: "2024-12-27 17:41:03",
-    updatedTime: "2024-12-27 17:41:03"
-  },
-  {
-    id: 4,
-    name: "Movimentação Óbito",
-    type: "SELECT",
-    expectedReturn: null,
-    sql: "SELECT FROM sgm_paciente",
-    createdTime: "2024-12-27 17:41:03",
-    updatedTime: "2024-12-27 17:41:03"
-  },
-]
-
-export type Payment = {
+export type Script = {
   id: number;
   name: string;
   type: string;
@@ -83,6 +47,16 @@ export type Payment = {
   updatedTime: string;
 }
 
+type QueryTypes = "SELECT" | "INSERT" | "UPDATE" | "DELETE";
+type LabelTypes = "default" | "destructive" | "outline" | "secondary";
+
+const labelType = {
+  "INSERT": "default",
+  "DELETE": "destructive",
+  "UPDATE": "outline",
+  "SELECT": "secondary",
+}
+
 export default function Page() {
   const router = useRouter()
   const [sorting, setSorting] = React.useState<SortingState>([])
@@ -90,7 +64,7 @@ export default function Page() {
     []
   )
 
-  const columns: ColumnDef<Payment>[] = [
+  const columns: ColumnDef<Script>[] = [
     {
       accessorKey: "id",
       header: ({ column }) => {
@@ -136,12 +110,12 @@ export default function Page() {
           </Button>
         )
       },
-      cell: ({ row }) => <div>{row.getValue("type")}</div>,
+      cell: ({ row }) => <div><Badge variant={labelType[row.getValue("type") as QueryTypes] as LabelTypes}>{row.getValue("type")}</Badge></div>,
     },
     {
-      accessorKey: "sql",
+      accessorKey: "sqlQuery",
       header: "SQL",
-      cell: ({ row }) => <div>{row.getValue("sql")}</div>,
+      cell: ({ row }) => <div>{row.getValue("sqlQuery")}</div>,
       enableSorting: false,
       enableHiding: false
     },
@@ -158,7 +132,7 @@ export default function Page() {
           </Button>
         )
       },
-      cell: ({ row }) => <div>{row.getValue("createdTime")}</div>,
+      cell: ({ row }) => <div>{formatDate(row.getValue("createdTime"))}</div>,
     },
     {
       accessorKey: "updatedTime",
@@ -173,7 +147,7 @@ export default function Page() {
           </Button>
         )
       },
-      cell: ({ row }) => <div>{row.getValue("updatedTime")}</div>,
+      cell: ({ row }) => <div>{formatDate(row.getValue("updatedTime"))}</div>,
     }
   ]
   
@@ -204,10 +178,10 @@ export default function Page() {
     <div className="flex flex-1 flex-col gap-4 p-6 pt-0">
       <div className="flex justify-between py-4 gap-2">
         <Input
-          placeholder="Filter emails..."
-          value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
+          placeholder="Filtrar por nome..."
+          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
-            table.getColumn("email")?.setFilterValue(event.target.value)
+            table.getColumn("name")?.setFilterValue(event.target.value)
           }
           className="max-w-sm"
         />

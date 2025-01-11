@@ -1,0 +1,50 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Script {
+  id               Int      @id @default(autoincrement())
+  name             String
+  scriptTypeId     Int
+  expectedReturnId Int
+  sqlQuery         String
+  createdTime      DateTime @default(now())
+  updatedTime      DateTime @default(now())
+
+  scriptTypes    ScriptType           @relation(fields: [scriptTypeId], references: [id])
+  expectedReturn ExpectedScriptReturn @relation(fields: [expectedReturnId], references: [id])
+
+  @@map("scripts")
+}
+
+model ScriptType {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  Script               Script[]
+  ExpectedScriptReturn ExpectedScriptReturn[]
+
+  @@map("scripts_types")
+}
+
+model ExpectedScriptReturn {
+  id           Int    @id @default(autoincrement())
+  scriptTypeId Int
+  description  String
+
+  scriptTypes ScriptType @relation(fields: [scriptTypeId], references: [id])
+  Script      Script[]
+
+  @@map("expected_scripts_return")
+}

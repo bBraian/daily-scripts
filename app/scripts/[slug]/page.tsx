@@ -19,10 +19,8 @@ import axios from "axios";
 const scriptSchema = z.object({
   name: z.string().min(1, "Escolha um nome"),
   sqlQuery: z.string().min(1, "SQL Query é obrigatório"),
-  type: z.enum(["SELECT", "INSERT", "UPDATE", "DELETE"], {
-    message: "Selecione um tipo"
-  }),
-  expectedReturn: z.string().min(1, "Retorno esperado é obrigatório")
+  scriptTypeId: z.string().min(1, "Tipo é obrigatório"),
+  expectedReturnId: z.string().min(1, "Retorno esperado é obrigatório")
 });
 
 type ScriptFormValues = z.infer<typeof scriptSchema>;
@@ -39,21 +37,20 @@ export default function Page({ params }: { params: { slug: string } }) {
 
   const [formData, setFormData] = useState<ScriptFormValues>({
     name: "",
-    type: "SELECT",
-    expectedReturn: "2",
+    scriptTypeId: "1",
+    expectedReturnId: "2",
     sqlQuery: "",
   });
 
   useEffect(() => {
+    async function getData() {
+      const res = await axios.get(`/api/script/${slug}`)
+  
+      setFormData(res.data)
+    }
+
     getData()
   }, [slug])
-
-  async function getData() {
-    const res = await axios.get(`/api/script/${slug}`)
-
-    setFormData(res.data)
-  }
-
   
   function handleChange(field: string, value: string) {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -72,8 +69,7 @@ export default function Page({ params }: { params: { slug: string } }) {
     }
   }
 
-  function handleSubmit (e: React.FormEvent) {
-    console.log(formData)
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setErrors({}); // Limpa os erros antes de validar
 
@@ -82,11 +78,13 @@ export default function Page({ params }: { params: { slug: string } }) {
       const validatedData = scriptSchema.parse({
         ...formData
       });
-
-      console.log("Dados validados com sucesso:", validatedData);
+      console.log(validatedData)
+      await axios.put(`/api/script/${slug}`, formData)
       // Aqui você pode enviar os dados para uma API ou fazer outra ação
     } catch (err) {
-      if (err instanceof Error) {
+      console.log(err)
+      if (err instanceof Error && (err as any).errors) {
+        console.error("ZOD_ERROR", err)
         // Transforma os erros do Zod em um objeto legível
         const zodErrors = (err as any).errors.reduce(
           (acc: any, curr: any) => ({
@@ -96,6 +94,8 @@ export default function Page({ params }: { params: { slug: string } }) {
           {}
         );
         setErrors(zodErrors);
+      } else {
+        console.error("REQ_ERROR", err)
       }
     }
   };
@@ -104,15 +104,11 @@ export default function Page({ params }: { params: { slug: string } }) {
     <div className="flex flex-1 flex-col gap-4 px-6 py-10 pt-4">
       <Card>
         <CardHeader>
-          <CardTitle>Editar script</CardTitle>
+          <CardTitle>Editar script | ID: {slug}</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid auto-rows-min gap-4 md:grid-cols-4 grid-cols-4">
-              <div>
-                <Label htmlFor="name">ID: {slug}</Label>
-              </div>
-              
+            <div className="grid auto-rows-min gap-4 md:grid-cols-3">
               {/* Name */}
               <div>
                 <Label htmlFor="name">Nome</Label>
@@ -128,28 +124,28 @@ export default function Page({ params }: { params: { slug: string } }) {
 
               {/* Type */}
               <div>
-                <Label htmlFor="type">Tipo</Label>
-                <Select name="type" onValueChange={(value) => handleChange("type", value == "" ? formData.type : value)} value={formData.type}>
+                <Label htmlFor="scriptTypeId">Tipo</Label>
+                <Select name="scriptTypeId" onValueChange={(value) => handleChange("scriptTypeId", value == "" ? formData.scriptTypeId : value)} value={formData.scriptTypeId}>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione um tipo" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
                       <SelectLabel>Tipo</SelectLabel>
-                      <SelectItem value="SELECT">SELECT</SelectItem>
-                      <SelectItem value="UPDATE">UPDATE</SelectItem>
-                      <SelectItem value="INSERT">INSERT</SelectItem>
-                      <SelectItem value="DELETE">DELETE</SelectItem>
+                      <SelectItem value="1">SELECT</SelectItem>
+                      <SelectItem value="2">UPDATE</SelectItem>
+                      <SelectItem value="3">INSERT</SelectItem>
+                      <SelectItem value="4">DELETE</SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
-                {errors.type && <p className="text-red-500">{errors.type}</p>}
+                {errors.scriptTypeId && <p className="text-red-500">{errors.scriptTypeId}</p>}
               </div>
 
-              {/* expectedReturn */}
+              {/* expectedReturnId */}
               <div>
-                <Label htmlFor="expectedReturn">Retorno Esperado</Label>
-                <Select name="expectedReturn" onValueChange={(value) => handleChange("expectedReturn", value == "" ? formData.expectedReturn : value)} value={formData.expectedReturn}>
+                <Label htmlFor="expectedReturnId">Retorno Esperado</Label>
+                <Select name="expectedReturnId" onValueChange={(value) => handleChange("expectedReturnId", value == "" ? formData.expectedReturnId : value)} value={formData.expectedReturnId}>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione um retorno esperado" />
                   </SelectTrigger>
@@ -161,7 +157,7 @@ export default function Page({ params }: { params: { slug: string } }) {
                     </SelectGroup>
                   </SelectContent>
                 </Select>
-                {errors.expectedReturn && <p className="text-red-500">{errors.expectedReturn}</p>}
+                {errors.expectedReturnId && <p className="text-red-500">{errors.expectedReturnId}</p>}
               </div>
             </div>
 
