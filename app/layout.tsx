@@ -18,6 +18,8 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 
+import { Toaster } from "@/components/ui/toaster"
+
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
@@ -42,6 +44,7 @@ export default function RootLayout({
   return (
     <html lang="pt-br" suppressHydrationWarning={true}>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`} suppressHydrationWarning={true}>
+        <Toaster />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

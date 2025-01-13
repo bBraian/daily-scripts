@@ -31,9 +31,14 @@ import { useEffect, useState } from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { sql } from "@codemirror/lang-sql";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Page({ params }: { params: { slug: string } }) {
+  const [isAppLoading, setIsAppLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
   const { slug } = params;
+  const { toast } = useToast()
 
   const [formData, setFormData] = useState<ScriptFormValues>({
     name: "",
@@ -45,8 +50,9 @@ export default function Page({ params }: { params: { slug: string } }) {
   useEffect(() => {
     async function getData() {
       const res = await axios.get(`/api/script/${slug}`)
-  
+      console.log(res.data)
       setFormData(res.data)
+      setIsAppLoading(false)
     }
 
     getData()
@@ -70,6 +76,10 @@ export default function Page({ params }: { params: { slug: string } }) {
   }
 
   async function handleSubmit(e: React.FormEvent) {
+    setIsLoading(true);
+    toast({
+      description: "Salvado Script",
+    })
     e.preventDefault();
     setErrors({}); // Limpa os erros antes de validar
 
@@ -79,9 +89,15 @@ export default function Page({ params }: { params: { slug: string } }) {
         ...formData
       });
       console.log(validatedData)
-      await axios.put(`/api/script/${slug}`, formData)
-      // Aqui você pode enviar os dados para uma API ou fazer outra ação
+      const res = await axios.put(`/api/script/${slug}`, formData)
+      if(res) {
+        toast({
+          description: "Registro salvo com sucesso",
+        })
+      }
+      setIsLoading(false);
     } catch (err) {
+      setIsLoading(false);
       console.log(err)
       if (err instanceof Error && (err as any).errors) {
         console.error("ZOD_ERROR", err)
@@ -95,10 +111,54 @@ export default function Page({ params }: { params: { slug: string } }) {
         );
         setErrors(zodErrors);
       } else {
+        toast({
+          variant: "destructive",
+          description: "Erro ao salvar registro",
+        })
         console.error("REQ_ERROR", err)
       }
     }
   };
+
+  if(isAppLoading) {
+    return (
+      <div className="flex flex-1 flex-col gap-4 px-6 py-10 pt-4">
+      <Card>
+        <CardHeader>
+          <Skeleton className="w-[250px] h-8" />
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            <div className="grid auto-rows-min gap-4 md:grid-cols-3">
+              <div>
+                <Skeleton className="w-[150px] h-6 mb-1" />
+                <Skeleton className="w-full h-8" />
+              </div>
+              <div>
+                <Skeleton className="w-[150px] h-6 mb-1" />
+                <Skeleton className="w-full h-8" />
+              </div>
+              <div>
+                <Skeleton className="w-[150px] h-6 mb-1" />
+                <Skeleton className="w-full h-8" />
+              </div>
+            </div>
+
+            <Skeleton className="w-full h-52" />
+            
+            <div className="flex justify-end gap-2">
+              <Skeleton className="w-[136px] h-9" />
+              <Skeleton className="w-[136px] h-9" />
+            </div>
+          </div>
+        </CardContent>
+        <CardFooter>
+        </CardFooter>
+      </Card>
+
+    </div>
+    )
+  }
 
   return (
     <div className="flex flex-1 flex-col gap-4 px-6 py-10 pt-4">
@@ -186,10 +246,18 @@ export default function Page({ params }: { params: { slug: string } }) {
             </div>
             
             <div className="flex justify-end gap-2">
-              <Button type="button" variant="destructive" onClick={() => {console.log(formData)}}>
+              <Button 
+                type="button" 
+                variant="destructive" 
+                onClick={() => {console.log(formData)}}
+                disabled={isLoading}
+              >
                 <Trash/> Excluir script
               </Button>
-              <Button type="submit">
+              <Button 
+                type="submit"
+                disabled={isLoading}
+              >
                 <Save/> Salvar script
               </Button>
             </div>

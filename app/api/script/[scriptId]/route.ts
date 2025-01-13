@@ -21,7 +21,14 @@ export async function GET(req: NextRequest, { params }: { params: { scriptId: st
             return NextResponse.json({ error: "Script not found", status: 404});
         }
 
-        return NextResponse.json(script);
+        const formattedScript = Object.fromEntries(
+            Object.entries(script).map(([key, value]) => [
+                key,
+                typeof value === "number" ? value.toString() : value,
+            ])
+        );
+
+        return NextResponse.json(formattedScript);
     } catch (error) {
         console.error("Error fetching script:", error);
         return NextResponse.json({ error: "Internal server error", status: 500});
