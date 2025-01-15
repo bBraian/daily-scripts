@@ -33,9 +33,9 @@ import {
 } from "@/components/ui/table"
 import Link from "next/link"
 import { useRouter } from 'next/navigation'
-import { data } from '../fakeData/index'
 import { Badge } from "@/components/ui/badge"
 import { formatDate } from "../lib/utils"
+import axios from "axios"
 
 export type Script = {
   id: number;
@@ -63,6 +63,7 @@ export default function Page() {
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   )
+  const [data, setData] = React.useState([])
 
   const columns: ColumnDef<Script>[] = [
     {
@@ -150,6 +151,15 @@ export default function Page() {
       cell: ({ row }) => <div>{formatDate(row.getValue("updatedTime"))}</div>,
     }
   ]
+
+  React.useEffect(() => {
+    async function getData() {
+      const res = await axios.get("/api/script")
+      setData(res.data);
+    }
+
+    getData()
+  }, [])
   
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({})
