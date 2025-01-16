@@ -25,6 +25,15 @@ const scriptSchema = z.object({
 
 type ScriptFormValues = z.infer<typeof scriptSchema>;
 type QueryTypes = "SELECT" | "INSERT" | "UPDATE" | "DELETE";
+type scriptTypesType = {
+  id: string
+  name: string
+}
+type expectedReturnsType = {
+  id: string
+  scriptTypeId: string
+  description: string
+}
 
 
 import { useEffect, useState } from "react";
@@ -37,28 +46,35 @@ import { useToast } from "@/hooks/use-toast";
 export default function Page({ params }: { params: { slug: string } }) {
   const [isAppLoading, setIsAppLoading] = useState(true)
   const [isLoading, setIsLoading] = useState(false)
+  const [scriptTypes, setScriptTypes] = useState<scriptTypesType[]>([])
+  const [expectedReturns, setExpectedReturns] = useState<expectedReturnsType[]>([])
   const { slug } = params;
   const { toast } = useToast()
 
   const [formData, setFormData] = useState<ScriptFormValues>({
     name: "",
-    scriptTypeId: "1",
-    expectedReturnId: "2",
+    scriptTypeId: "0",
+    expectedReturnId: "0",
     sqlQuery: "",
   });
 
   useEffect(() => {
-    async function getData() {
-      const res = await axios.get(`/api/script/${slug}`)
-      console.log(res.data)
-      setFormData(res.data)
-      setIsAppLoading(false)
+    async function fetchFormDetails() {
+      const [responseScript, responseExpectedReturn, responseData] = await Promise.all([
+        axios.get('/api/scriptType'),
+        axios.get('/api/expectedReturn'),
+        axios.get(`/api/script/${slug}`),
+      ]);
+      setScriptTypes(responseScript.data);
+      setExpectedReturns(responseExpectedReturn.data);
+      setFormData(responseData.data);
+      setIsAppLoading(false);
     }
+    fetchFormDetails();
+  }, [slug]);
 
-    getData()
-  }, [slug])
-  
   function handleChange(field: string, value: string) {
+    console.log(field, value)
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
   
@@ -81,10 +97,9 @@ export default function Page({ params }: { params: { slug: string } }) {
       description: "Salvado Script",
     })
     e.preventDefault();
-    setErrors({}); // Limpa os erros antes de validar
+    setErrors({});
 
     try {
-      // Tenta validar os dados do formulário
       const validatedData = scriptSchema.parse({
         ...formData
       });
@@ -185,22 +200,26 @@ export default function Page({ params }: { params: { slug: string } }) {
               {/* Type */}
               <div>
                 <Label htmlFor="scriptTypeId">Tipo</Label>
-                <Select name="scriptTypeId" onValueChange={(value) => handleChange("scriptTypeId", value == "" ? formData.scriptTypeId : value)} value={formData.scriptTypeId}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione um tipo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectLabel>Tipo</SelectLabel>
-                      <SelectItem value="1">SELECT</SelectItem>
-                      <SelectItem value="2">UPDATE</SelectItem>
-                      <SelectItem value="3">INSERT</SelectItem>
-                      <SelectItem value="4">DELETE</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
+                {scriptTypes.length > 0 && (
+                  <Select name="scriptTypeId" onValueChange={(value) => handleChange("scriptTypeId", value == "" ? formData.scriptTypeId : value)} value={formData.scriptTypeId}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione um tipo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectLabel>Tipo</SelectLabel>
+                        {scriptTypes.map((scriptType) => (
+                          <SelectItem key={scriptType.id} value={scriptType.id}>
+                            {scriptType.name}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                )}
                 {errors.scriptTypeId && <p className="text-red-500">{errors.scriptTypeId}</p>}
               </div>
+              
 
               {/* expectedReturnId */}
               <div>
@@ -212,8 +231,9 @@ export default function Page({ params }: { params: { slug: string } }) {
                   <SelectContent>
                     <SelectGroup>
                       <SelectLabel>Retorno Esperado</SelectLabel>
-                      <SelectItem value="2">Apple</SelectItem>
-                      <SelectItem value="3">Banana</SelectItem>
+                      {expectedReturns.map((expectedReturn) => (
+                        <SelectItem key={expectedReturn.id} value={expectedReturn.id}>{expectedReturn.description}</SelectItem>
+                      ))}
                     </SelectGroup>
                   </SelectContent>
                 </Select>

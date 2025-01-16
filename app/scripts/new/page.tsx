@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue, SelectGroup, SelectLabel } from "@/components/ui/select";
 import { Plus } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Label } from "@/components/ui/label";
 
 const scriptSchema = z.object({
@@ -26,18 +26,44 @@ const scriptSchema = z.object({
   expectedReturn: z.string().min(1, "Retorno esperado é obrigatório")
 });
 
-// type ScriptFormValues = z.infer<typeof scriptSchema>;
+type scriptTypesType = {
+  id: string
+  name: string
+}
+type expectedReturnsType = {
+  id: string
+  scriptTypeId: string
+  description: string
+}
 
 import CodeMirror from "@uiw/react-codemirror";
 import { sql } from "@codemirror/lang-sql";
+import axios from "axios";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Page() {
+  const [isLoading, setIsLoading] = useState(true)
+  const [scriptTypes, setScriptTypes] = useState<scriptTypesType[]>([])
+  const [expectedReturns, setExpectedReturns] = useState<expectedReturnsType[]>([])
   const [formData, setFormData] = useState({
     name: "",
     type: "",
     expectedReturn: "",
     sqlQuery: "\n\n\n\n\n\n\n\n\n",
   });
+
+  useEffect(() => {
+    async function fetchFormDetails() {
+      const [responseScript, responseExpectedReturn] = await Promise.all([
+        axios.get('/api/scriptType'),
+        axios.get('/api/expectedReturn'),
+      ]);
+      setScriptTypes(responseScript.data);
+      setExpectedReturns(responseExpectedReturn.data);
+      setIsLoading(false);
+    }
+    fetchFormDetails();
+  }, []);
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
@@ -84,6 +110,44 @@ export default function Page() {
     }
   };
 
+  if(isLoading) {
+    return (
+      <div className="flex flex-1 flex-col gap-4 px-6 py-10 pt-4">
+      <Card>
+        <CardHeader>
+          <Skeleton className="w-[250px] h-8" />
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            <div className="grid auto-rows-min gap-4 md:grid-cols-3">
+              <div>
+                <Skeleton className="w-[150px] h-6 mb-1" />
+                <Skeleton className="w-full h-8" />
+              </div>
+              <div>
+                <Skeleton className="w-[150px] h-6 mb-1" />
+                <Skeleton className="w-full h-8" />
+              </div>
+              <div>
+                <Skeleton className="w-[150px] h-6 mb-1" />
+                <Skeleton className="w-full h-8" />
+              </div>
+            </div>
+
+            <Skeleton className="w-full h-52" />
+            
+            <div className="flex justify-end gap-2">
+              <Skeleton className="w-[136px] h-9" />
+              <Skeleton className="w-[136px] h-9" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+    </div>
+    )
+  }
+
   return (
     <div className="flex flex-1 flex-col gap-4 px-6 py-10 pt-4">
       <Card>
@@ -117,10 +181,11 @@ export default function Page() {
                   <SelectContent>
                     <SelectGroup>
                       <SelectLabel>Tipo</SelectLabel>
-                      <SelectItem value="SELECT">SELECT</SelectItem>
-                      <SelectItem value="UPDATE">UPDATE</SelectItem>
-                      <SelectItem value="INSERT">INSERT</SelectItem>
-                      <SelectItem value="DELETE">DELETE</SelectItem>
+                      {scriptTypes.map((scriptType) => (
+                        <SelectItem key={scriptType.id} value={scriptType.id}>
+                          {scriptType.name}
+                        </SelectItem>
+                      ))}
                     </SelectGroup>
                   </SelectContent>
                 </Select>
@@ -137,8 +202,9 @@ export default function Page() {
                   <SelectContent>
                     <SelectGroup>
                       <SelectLabel>Retorno Esperado</SelectLabel>
-                      <SelectItem value="apple">Apple</SelectItem>
-                      <SelectItem value="banana">Banana</SelectItem>
+                      {expectedReturns.map((expectedReturn) => (
+                        <SelectItem key={expectedReturn.id} value={expectedReturn.id}>{expectedReturn.description}</SelectItem>
+                      ))}
                     </SelectGroup>
                   </SelectContent>
                 </Select>

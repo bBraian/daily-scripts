@@ -57,6 +57,7 @@ export async function PUT(req: NextRequest, { params }: { params: { scriptId: st
                 scriptTypeId: parseInt(scriptTypeId),
                 expectedReturnId: parseInt(expectedReturnId),
                 sqlQuery,
+                updatedTime: new Date()
             },
         });
 

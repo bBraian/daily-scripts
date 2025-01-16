@@ -40,21 +40,24 @@ import axios from "axios"
 export type Script = {
   id: number;
   name: string;
-  type: string;
+  scriptTypeId: string;
   expectedReturn: number | null;
   sql: string;
   createdTime: string;
   updatedTime: string;
 }
 
-type QueryTypes = "SELECT" | "INSERT" | "UPDATE" | "DELETE";
+type QueryTypes = {
+  id: string,
+  name: string
+}
 type LabelTypes = "default" | "destructive" | "outline" | "secondary";
 
 const labelType = {
-  "INSERT": "default",
-  "DELETE": "destructive",
-  "UPDATE": "outline",
-  "SELECT": "secondary",
+  "1": "secondary",
+  "2": "outline",
+  "3": "default",
+  "4": "destructive",
 }
 
 export default function Page() {
@@ -99,7 +102,7 @@ export default function Page() {
       cell: ({ row }) => <div>{row.getValue("name")}</div>,
     },
     {
-      accessorKey: "type",
+      accessorKey: "scriptTypes",
       header: ({ column }) => {
         return (
           <Button
@@ -111,12 +114,24 @@ export default function Page() {
           </Button>
         )
       },
-      cell: ({ row }) => <div><Badge variant={labelType[row.getValue("type") as QueryTypes] as LabelTypes}>{row.getValue("type")}</Badge></div>,
+      cell: ({ row }) => {
+        const scriptType = row.getValue("scriptTypes") as QueryTypes;
+      
+        return (
+          <div>
+            <Badge
+              variant={labelType[scriptType.id as keyof typeof labelType] as LabelTypes}
+            >
+              {scriptType.name}
+            </Badge>
+          </div>
+        );
+      },
     },
     {
       accessorKey: "sqlQuery",
       header: "SQL",
-      cell: ({ row }) => <div>{row.getValue("sqlQuery")}</div>,
+      cell: ({ row }) => <div className="text-ellipsis overflow-hidden whitespace-nowrap max-w-96">{row.getValue("sqlQuery")}</div>,
       enableSorting: false,
       enableHiding: false
     },
@@ -155,6 +170,7 @@ export default function Page() {
   React.useEffect(() => {
     async function getData() {
       const res = await axios.get("/api/script")
+      console.log(res.data)
       setData(res.data);
     }
 
