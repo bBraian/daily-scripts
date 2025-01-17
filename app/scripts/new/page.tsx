@@ -20,11 +20,9 @@ import { Label } from "@/components/ui/label";
 const scriptSchema = z.object({
   name: z.string().min(1, "Escolha um nome"),
   sqlQuery: z.string().min(1, "SQL Query é obrigatório"),
-  type: z.enum(["SELECT", "INSERT", "UPDATE", "DELETE"], {
-    message: "Selecione um tipo"
-  }),
-  expectedReturn: z.string().min(1, "Retorno esperado é obrigatório")
-});
+  scriptTypeId: z.string().min(1, "Tipo é obrigatório"),
+  expectedReturnId: z.string().min(1, "Retorno esperado é obrigatório")
+}); 
 
 type scriptTypesType = {
   id: string
@@ -41,6 +39,7 @@ import { sql } from "@codemirror/lang-sql";
 import axios from "axios";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Page() {
   const [isLoading, setIsLoading] = useState(true)
@@ -49,10 +48,11 @@ export default function Page() {
   const [expectedReturnsChained, setExpectedReturnsChained] = useState<expectedReturnsType[]>([])
   const [formData, setFormData] = useState({
     name: "",
-    type: "",
+    scriptTypeId: "",
     expectedReturn: "",
     sqlQuery: "\n\n\n\n\n\n\n\n\n",
   });
+  const { toast } = useToast()
 
   useEffect(() => {
     async function fetchFormDetails() {
@@ -68,9 +68,9 @@ export default function Page() {
   }, []);
 
   useEffect(() => {
-    const expectedReturnsFiltered = expectedReturns.filter((expectedReturn) => expectedReturn.scriptTypeId == formData.type)
+    const expectedReturnsFiltered = expectedReturns.filter((expectedReturn) => expectedReturn.scriptTypeId == formData.scriptTypeId)
     setExpectedReturnsChained(expectedReturnsFiltered)
-  }, [formData.type, expectedReturns]);
+  }, [formData.scriptTypeId, expectedReturns]);
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
@@ -84,25 +84,35 @@ export default function Page() {
     const firstWord = value.trim().split(/\s+/)[0]?.toUpperCase();
     const typeFound: scriptTypesType | undefined = scriptTypes.find((scriptType) => scriptType.name === firstWord);
     if(typeFound) {
-      setFormData((prev) => ({ ...prev, "type": typeFound.id.toString() }));
+      setFormData((prev) => ({ ...prev, "scriptTypeId": typeFound.id.toString() }));
     }
   }
 
-  function handleSubmit (e: React.FormEvent) {
-    console.log(formData)
+  async function handleSubmit(e: React.FormEvent) {
+    setIsLoading(true);
+    toast({
+      description: "Incluindo Script",
+    })
     e.preventDefault();
-    setErrors({}); // Limpa os erros antes de validar
+    setErrors({});
 
     try {
-      // Tenta validar os dados do formulário
       const validatedData = scriptSchema.parse({
         ...formData
       });
-
-      console.log("Dados validados com sucesso:", validatedData);
-      // Aqui você pode enviar os dados para uma API ou fazer outra ação
+      console.log(validatedData)
+      const res = await axios.post('/api/script', formData)
+      if(res) {
+        toast({
+          description: "Registro incluído com sucesso",
+        })
+      }
+      setIsLoading(false);
     } catch (err) {
-      if (err instanceof Error) {
+      setIsLoading(false);
+      console.log(err)
+      if (err instanceof Error && (err as any).errors) {
+        console.error("ZOD_ERROR", err)
         // Transforma os erros do Zod em um objeto legível
         const zodErrors = (err as any).errors.reduce(
           (acc: any, curr: any) => ({
@@ -112,6 +122,12 @@ export default function Page() {
           {}
         );
         setErrors(zodErrors);
+      } else {
+        toast({
+          variant: "destructive",
+          description: "Erro ao incluir registro",
+        })
+        console.error("REQ_ERROR", err)
       }
     }
   };
@@ -194,8 +210,8 @@ export default function Page() {
 
               {/* Type */}
               <div>
-                <Label htmlFor="type">Tipo</Label>
-                <Select name="type" onValueChange={(value) => handleChange("type", value)} value={formData.type}>
+                <Label htmlFor="scriptTypeId">Tipo</Label>
+                <Select name="scriptTypeId" onValueChange={(value) => handleChange("scriptTypeId", value)} value={formData.scriptTypeId}>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione um tipo" />
                   </SelectTrigger>
@@ -210,7 +226,7 @@ export default function Page() {
                     </SelectGroup>
                   </SelectContent>
                 </Select>
-                {errors.type && <p className="text-red-500">{errors.type}</p>}
+                {errors.scriptTypeId && <p className="text-red-500">{errors.scriptTypeId}</p>}
               </div>
 
               {/* expectedReturn */}
