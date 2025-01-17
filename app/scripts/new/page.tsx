@@ -13,7 +13,7 @@ import * as z from "zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue, SelectGroup, SelectLabel } from "@/components/ui/select";
-import { Plus } from "lucide-react";
+import { ArrowLeft, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Label } from "@/components/ui/label";
 
@@ -40,11 +40,13 @@ import CodeMirror from "@uiw/react-codemirror";
 import { sql } from "@codemirror/lang-sql";
 import axios from "axios";
 import { Skeleton } from "@/components/ui/skeleton";
+import Link from "next/link";
 
 export default function Page() {
   const [isLoading, setIsLoading] = useState(true)
   const [scriptTypes, setScriptTypes] = useState<scriptTypesType[]>([])
   const [expectedReturns, setExpectedReturns] = useState<expectedReturnsType[]>([])
+  const [expectedReturnsChained, setExpectedReturnsChained] = useState<expectedReturnsType[]>([])
   const [formData, setFormData] = useState({
     name: "",
     type: "",
@@ -65,6 +67,11 @@ export default function Page() {
     fetchFormDetails();
   }, []);
 
+  useEffect(() => {
+    const expectedReturnsFiltered = expectedReturns.filter((expectedReturn) => expectedReturn.scriptTypeId == formData.type)
+    setExpectedReturnsChained(expectedReturnsFiltered)
+  }, [formData.type, expectedReturns]);
+
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   function handleChange(field: string, value: string) {
@@ -75,10 +82,9 @@ export default function Page() {
     setFormData((prev) => ({ ...prev, "sqlQuery": value }));
 
     const firstWord = value.trim().split(/\s+/)[0]?.toUpperCase();
-    console.log(firstWord)
-    const types = ['SELECT', 'INSERT', 'UPDATE', 'DELETE'];
-    if(types.includes(firstWord)) {
-      setFormData((prev) => ({ ...prev, "type": firstWord }));
+    const typeFound: scriptTypesType | undefined = scriptTypes.find((scriptType) => scriptType.name === firstWord);
+    if(typeFound) {
+      setFormData((prev) => ({ ...prev, "type": typeFound.id.toString() }));
     }
   }
 
@@ -152,8 +158,23 @@ export default function Page() {
     <div className="flex flex-1 flex-col gap-4 px-6 py-10 pt-4">
       <Card>
         <CardHeader>
-          <CardTitle>Criar novo script</CardTitle>
-          <CardDescription>Preencha o formulario para criar um script novo</CardDescription>
+          <div className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle>Criar novo script</CardTitle>
+              <CardDescription>Preencha o formulario para criar um script novo</CardDescription>
+            </div>
+            <Button 
+              type="button" 
+              asChild
+              disabled={isLoading}
+              variant="outline"
+            >
+              <Link href="/scripts">
+                <ArrowLeft/> Voltar
+              </Link>
+              
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -182,7 +203,7 @@ export default function Page() {
                     <SelectGroup>
                       <SelectLabel>Tipo</SelectLabel>
                       {scriptTypes.map((scriptType) => (
-                        <SelectItem key={scriptType.id} value={scriptType.id}>
+                        <SelectItem key={scriptType.id} value={scriptType.id.toString()}>
                           {scriptType.name}
                         </SelectItem>
                       ))}
@@ -195,15 +216,15 @@ export default function Page() {
               {/* expectedReturn */}
               <div>
                 <Label htmlFor="expectedReturn">Retorno Esperado</Label>
-                <Select name="expectedReturn" onValueChange={(value) => handleChange("expectedReturn", value)} value={formData.expectedReturn}>
+                <Select disabled={expectedReturnsChained.length == 0} name="expectedReturn" onValueChange={(value) => handleChange("expectedReturn", value)} value={formData.expectedReturn}>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione um retorno esperado" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
                       <SelectLabel>Retorno Esperado</SelectLabel>
-                      {expectedReturns.map((expectedReturn) => (
-                        <SelectItem key={expectedReturn.id} value={expectedReturn.id}>{expectedReturn.description}</SelectItem>
+                      {expectedReturnsChained.map((expectedReturn) => (
+                        <SelectItem key={expectedReturn.id} value={expectedReturn.id.toString()}>{expectedReturn.description}</SelectItem>
                       ))}
                     </SelectGroup>
                   </SelectContent>

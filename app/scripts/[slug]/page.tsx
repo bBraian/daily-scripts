@@ -13,7 +13,7 @@ import * as z from "zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue, SelectGroup, SelectLabel } from "@/components/ui/select";
-import { Save, Trash } from "lucide-react";
+import { ArrowLeft, Plus, Save, Trash } from "lucide-react";
 import axios from "axios";
 
 const scriptSchema = z.object({
@@ -42,12 +42,14 @@ import { sql } from "@codemirror/lang-sql";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
+import Link from "next/link";
 
 export default function Page({ params }: { params: { slug: string } }) {
   const [isAppLoading, setIsAppLoading] = useState(true)
   const [isLoading, setIsLoading] = useState(false)
   const [scriptTypes, setScriptTypes] = useState<scriptTypesType[]>([])
   const [expectedReturns, setExpectedReturns] = useState<expectedReturnsType[]>([])
+  const [expectedReturnsChained, setExpectedReturnsChained] = useState<expectedReturnsType[]>([])
   const { slug } = params;
   const { toast } = useToast()
 
@@ -73,8 +75,12 @@ export default function Page({ params }: { params: { slug: string } }) {
     fetchFormDetails();
   }, [slug]);
 
+  useEffect(() => {
+    const expectedReturnsFiltered = expectedReturns.filter((expectedReturn) => expectedReturn.scriptTypeId == formData.scriptTypeId)
+    setExpectedReturnsChained(expectedReturnsFiltered)
+  }, [formData.scriptTypeId, expectedReturns]);
+
   function handleChange(field: string, value: string) {
-    console.log(field, value)
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
   
@@ -84,10 +90,9 @@ export default function Page({ params }: { params: { slug: string } }) {
     setFormData((prev) => ({ ...prev, "sqlQuery": value }));
 
     const firstWord = value.trim().split(/\s+/)[0]?.toUpperCase() as QueryTypes;
-    console.log(firstWord)
-    const types = ["SELECT", "INSERT", "UPDATE", "DELETE"];
-    if(types.includes(firstWord)) {
-      setFormData((prev) => ({ ...prev, "type": firstWord }));
+    const typeFound: scriptTypesType | undefined = scriptTypes.find((scriptType) => scriptType.name === firstWord);
+    if(typeFound) {
+      setFormData((prev) => ({ ...prev, "type": typeFound.id.toString() }));
     }
   }
 
@@ -179,8 +184,29 @@ export default function Page({ params }: { params: { slug: string } }) {
     <div className="flex flex-1 flex-col gap-4 px-6 py-10 pt-4">
       <Card>
         <CardHeader>
-          <CardTitle>Editar script | ID: {slug}</CardTitle>
+          <div className="flex flex-row items-center justify-between">
+            <CardTitle>Editar script | ID: {slug}</CardTitle>
+            <div className="flex justify-end gap-2">
+              <Button 
+                type="button" 
+                asChild
+                disabled={isLoading}
+                variant="outline"
+              >
+                <Link href="/scripts">
+                  <ArrowLeft/> Voltar
+                </Link>
+                
+              </Button>
+              <Button asChild variant="outline" className="ml-auto">
+                <Link href="/scripts/new">
+                  Novo script <Plus />
+                </Link>
+              </Button>
+            </div>
+          </div>
         </CardHeader>
+
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid auto-rows-min gap-4 md:grid-cols-3">
@@ -209,7 +235,7 @@ export default function Page({ params }: { params: { slug: string } }) {
                       <SelectGroup>
                         <SelectLabel>Tipo</SelectLabel>
                         {scriptTypes.map((scriptType) => (
-                          <SelectItem key={scriptType.id} value={scriptType.id}>
+                          <SelectItem key={scriptType.id} value={scriptType.id.toString()}>
                             {scriptType.name}
                           </SelectItem>
                         ))}
@@ -218,21 +244,20 @@ export default function Page({ params }: { params: { slug: string } }) {
                   </Select>
                 )}
                 {errors.scriptTypeId && <p className="text-red-500">{errors.scriptTypeId}</p>}
-              </div>
-              
+              </div> 
 
               {/* expectedReturnId */}
               <div>
                 <Label htmlFor="expectedReturnId">Retorno Esperado</Label>
-                <Select name="expectedReturnId" onValueChange={(value) => handleChange("expectedReturnId", value == "" ? formData.expectedReturnId : value)} value={formData.expectedReturnId}>
+                <Select disabled={expectedReturnsChained.length == 0} name="expectedReturnId" onValueChange={(value) => handleChange("expectedReturnId", value == "" ? formData.expectedReturnId : value)} value={formData.expectedReturnId}>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione um retorno esperado" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
                       <SelectLabel>Retorno Esperado</SelectLabel>
-                      {expectedReturns.map((expectedReturn) => (
-                        <SelectItem key={expectedReturn.id} value={expectedReturn.id}>{expectedReturn.description}</SelectItem>
+                      {expectedReturnsChained.map((expectedReturn) => (
+                        <SelectItem key={expectedReturn.id} value={expectedReturn.id.toString()}>{expectedReturn.description}</SelectItem>
                       ))}
                     </SelectGroup>
                   </SelectContent>
