@@ -46,21 +46,25 @@ const data = {
       nav: [
         {
           title: "Home",
-          url: "/",
+          url: "/home",
           icon: Home
         },
         {
           title: "Scripts",
-          url: "/scripts",
+          url: "/home/scripts",
           icon: SquareTerminal,
           items: [
             {
               title: "Listagem",
-              url: "/scripts",
+              url: "/home/scripts",
             },
             {
               title: "Novo",
-              url: "/scripts/new",
+              url: "/home/scripts/new",
+            },
+            {
+              title: "Rodar",
+              url: "/home/scripts/run",
             }
           ],
         },

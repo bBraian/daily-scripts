@@ -49,7 +49,7 @@ export default function Page() {
   const [formData, setFormData] = useState({
     name: "",
     scriptTypeId: "",
-    expectedReturn: "",
+    expectedReturnId: "",
     sqlQuery: "\n\n\n\n\n\n\n\n\n",
   });
   const { toast } = useToast()
@@ -89,18 +89,19 @@ export default function Page() {
   }
 
   async function handleSubmit(e: React.FormEvent) {
+    console.log('submitting', formData)
     setIsLoading(true);
     toast({
       description: "Incluindo Script",
     })
     e.preventDefault();
     setErrors({});
-
+    console.log(formData)
     try {
       const validatedData = scriptSchema.parse({
         ...formData
       });
-      console.log(validatedData)
+      console.log(formData)
       const res = await axios.post('/api/script', formData)
       if(res) {
         toast({
@@ -185,7 +186,7 @@ export default function Page() {
               disabled={isLoading}
               variant="outline"
             >
-              <Link href="/scripts">
+              <Link href="/home/scripts">
                 <ArrowLeft/> Voltar
               </Link>
               
@@ -231,8 +232,8 @@ export default function Page() {
 
               {/* expectedReturn */}
               <div>
-                <Label htmlFor="expectedReturn">Retorno Esperado</Label>
-                <Select disabled={expectedReturnsChained.length == 0} name="expectedReturn" onValueChange={(value) => handleChange("expectedReturn", value)} value={formData.expectedReturn}>
+                <Label htmlFor="expectedReturnId">Retorno Esperado</Label>
+                <Select disabled={expectedReturnsChained.length == 0} name="expectedReturnId" onValueChange={(value) => handleChange("expectedReturnId", value)} value={formData.expectedReturnId}>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione um retorno esperado" />
                   </SelectTrigger>

@@ -34,7 +34,7 @@ import {
 import Link from "next/link"
 import { useRouter } from 'next/navigation'
 import { Badge } from "@/components/ui/badge"
-import { formatDate } from "../lib/utils"
+import { formatDate } from "../../lib/utils"
 import axios from "axios"
 
 export type Script = {
@@ -83,7 +83,7 @@ export default function Page() {
         )
       },
       cell: ({ row }) => (
-        <div className="capitalize">{row.getValue("id")}</div>
+        <Badge variant="outline" className="text-lg">{row.getValue("id")}</Badge>
       ),
     },
     {
@@ -213,7 +213,7 @@ export default function Page() {
         />
         <div className="flex gap-2">
           <Button asChild variant="outline" className="ml-auto">
-            <Link href="/scripts/new">
+            <Link href="/home/scripts/new">
               Novo script <Plus />
             </Link>
           </Button>
@@ -271,7 +271,7 @@ export default function Page() {
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  onClick={() => router.push(`/scripts/${row.getValue("id")}`)}
+                  onClick={() => router.push(`/home/scripts/${row.getValue("id")}`)}
                   className="cursor-pointer"
                 >
                   {row.getVisibleCells().map((cell) => (

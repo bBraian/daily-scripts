@@ -193,13 +193,13 @@ export default function Page({ params }: { params: { slug: string } }) {
                 disabled={isLoading}
                 variant="outline"
               >
-                <Link href="/scripts">
+                <Link href="/home/scripts">
                   <ArrowLeft/> Voltar
                 </Link>
                 
               </Button>
               <Button asChild variant="outline" className="ml-auto">
-                <Link href="/scripts/new">
+                <Link href="/home/scripts/new">
                   Novo script <Plus />
                 </Link>
               </Button>
