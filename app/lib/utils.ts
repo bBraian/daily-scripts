@@ -1,6 +1,6 @@
 export function formatDate(dateString: string) {
   const date = new Date(dateString);
-  
+
   const options: Intl.DateTimeFormatOptions = {
     day: "2-digit",
     month: "2-digit",
@@ -11,4 +11,4 @@ export function formatDate(dateString: string) {
   };
 
   return new Intl.DateTimeFormat("pt-BR", options).format(date);
-};
+}

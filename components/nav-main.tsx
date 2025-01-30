@@ -1,12 +1,12 @@
-"use client"
+"use client";
 
-import { ChevronRight, type LucideIcon } from "lucide-react"
+import { ChevronRight, type LucideIcon } from "lucide-react";
 
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@/components/ui/collapsible"
+} from "@/components/ui/collapsible";
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -16,28 +16,28 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
-} from "@/components/ui/sidebar"
-import { Fragment } from "react"
+} from "@/components/ui/sidebar";
+import { Fragment } from "react";
 
 interface NavMainProps {
   navMain: {
-    navGroup: string
-    nav: NavProps[]
-  } []
+    navGroup: string;
+    nav: NavProps[];
+  }[];
 }
 
 interface NavProps {
-  title: string
-  url: string
-  icon: LucideIcon
-  isActive?: boolean
+  title: string;
+  url: string;
+  icon: LucideIcon;
+  isActive?: boolean;
   items?: {
-    title: string
-    url: string
-  } []
+    title: string;
+    url: string;
+  }[];
 }
 
-export function NavMain({navMain} :NavMainProps) {
+export function NavMain({ navMain }: NavMainProps) {
   return (
     <Fragment>
       {navMain.map((items) => (
@@ -46,8 +46,7 @@ export function NavMain({navMain} :NavMainProps) {
           <SidebarMenu>
             {items.nav.map((item) => (
               <Fragment key={item.title}>
-                {item.items ? 
-                (
+                {item.items ? (
                   <Collapsible
                     key={item.title}
                     asChild
@@ -88,12 +87,10 @@ export function NavMain({navMain} :NavMainProps) {
                   </SidebarMenuItem>
                 )}
               </Fragment>
-              
             ))}
           </SidebarMenu>
         </SidebarGroup>
       ))}
-      
     </Fragment>
-  )
+  );
 }

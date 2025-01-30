@@ -1,8 +1,8 @@
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import Link from "next/link"
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import Link from "next/link";
 
 export default function Page({
   className,
@@ -26,12 +26,12 @@ export default function Page({
           <Input id="username" type="text" placeholder="johdoe" required />
         </div>
         <div className="grid gap-2">
-            <Label htmlFor="password">Senha</Label>
-            <Input id="password" type="password" required />
+          <Label htmlFor="password">Senha</Label>
+          <Input id="password" type="password" required />
         </div>
         <div className="grid gap-2">
-            <Label htmlFor="password">Repetir senha </Label>
-            <Input id="password" type="password" required />
+          <Label htmlFor="password">Repetir senha </Label>
+          <Input id="password" type="password" required />
         </div>
         <Button type="submit" className="w-full">
           Registrar-se
@@ -44,5 +44,5 @@ export default function Page({
         </Link>
       </div>
     </form>
-  )
+  );
 }

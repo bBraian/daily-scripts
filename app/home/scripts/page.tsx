@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import * as React from "react";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -12,17 +12,17 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
-} from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, Plus } from "lucide-react"
+} from "@tanstack/react-table";
+import { ArrowUpDown, ChevronDown, Plus } from "lucide-react";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -30,12 +30,12 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import Link from "next/link"
-import { useRouter } from 'next/navigation'
-import { Badge } from "@/components/ui/badge"
-import { formatDate } from "../../lib/utils"
-import axios from "axios"
+} from "@/components/ui/table";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Badge } from "@/components/ui/badge";
+import { formatDate } from "../../lib/utils";
+import axios from "axios";
 
 export type Script = {
   id: number;
@@ -45,12 +45,12 @@ export type Script = {
   sql: string;
   createdTime: string;
   updatedTime: string;
-}
+};
 
 type QueryTypes = {
-  id: string,
-  name: string
-}
+  id: string;
+  name: string;
+};
 type LabelTypes = "default" | "destructive" | "outline" | "secondary";
 
 const labelType = {
@@ -58,15 +58,15 @@ const labelType = {
   "2": "outline",
   "3": "default",
   "4": "destructive",
-}
+};
 
 export default function Page() {
-  const router = useRouter()
-  const [sorting, setSorting] = React.useState<SortingState>([])
+  const router = useRouter();
+  const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  )
-  const [data, setData] = React.useState([])
+    [],
+  );
+  const [data, setData] = React.useState([]);
 
   const columns: ColumnDef<Script>[] = [
     {
@@ -80,10 +80,12 @@ export default function Page() {
             ID
             <ArrowUpDown />
           </Button>
-        )
+        );
       },
       cell: ({ row }) => (
-        <Badge variant="outline" className="text-lg">{row.getValue("id")}</Badge>
+        <Badge variant="outline" className="text-lg">
+          {row.getValue("id")}
+        </Badge>
       ),
     },
     {
@@ -97,7 +99,7 @@ export default function Page() {
             Nome
             <ArrowUpDown />
           </Button>
-        )
+        );
       },
       cell: ({ row }) => <div>{row.getValue("name")}</div>,
     },
@@ -112,15 +114,17 @@ export default function Page() {
             Tipo
             <ArrowUpDown />
           </Button>
-        )
+        );
       },
       cell: ({ row }) => {
         const scriptType = row.getValue("scriptTypes") as QueryTypes;
-      
+
         return (
           <div>
             <Badge
-              variant={labelType[scriptType.id as keyof typeof labelType] as LabelTypes}
+              variant={
+                labelType[scriptType.id as keyof typeof labelType] as LabelTypes
+              }
             >
               {scriptType.name}
             </Badge>
@@ -131,9 +135,13 @@ export default function Page() {
     {
       accessorKey: "sqlQuery",
       header: "SQL",
-      cell: ({ row }) => <div className="text-ellipsis overflow-hidden whitespace-nowrap max-w-96">{row.getValue("sqlQuery")}</div>,
+      cell: ({ row }) => (
+        <div className="text-ellipsis overflow-hidden whitespace-nowrap max-w-96">
+          {row.getValue("sqlQuery")}
+        </div>
+      ),
       enableSorting: false,
-      enableHiding: false
+      enableHiding: false,
     },
     {
       accessorKey: "createdTime",
@@ -146,7 +154,7 @@ export default function Page() {
             Data Inclusão
             <ArrowUpDown />
           </Button>
-        )
+        );
       },
       cell: ({ row }) => <div>{formatDate(row.getValue("createdTime"))}</div>,
     },
@@ -161,25 +169,25 @@ export default function Page() {
             Data Atualização
             <ArrowUpDown />
           </Button>
-        )
+        );
       },
       cell: ({ row }) => <div>{formatDate(row.getValue("updatedTime"))}</div>,
-    }
-  ]
+    },
+  ];
 
   React.useEffect(() => {
     async function getData() {
-      const res = await axios.get("/api/script")
-      console.log(res.data)
+      const res = await axios.get("/api/script");
+      console.log(res.data);
       setData(res.data);
     }
 
-    getData()
-  }, [])
-  
+    getData();
+  }, []);
+
   const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({})
-  const [rowSelection, setRowSelection] = React.useState({})
+    React.useState<VisibilityState>({});
+  const [rowSelection, setRowSelection] = React.useState({});
 
   const table = useReactTable({
     data,
@@ -198,7 +206,7 @@ export default function Page() {
       columnVisibility,
       rowSelection,
     },
-  })
+  });
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-6 pt-0">
@@ -239,7 +247,7 @@ export default function Page() {
                     >
                       {column.id}
                     </DropdownMenuCheckboxItem>
-                  )
+                  );
                 })}
             </DropdownMenuContent>
           </DropdownMenu>
@@ -257,10 +265,10 @@ export default function Page() {
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                     </TableHead>
-                  )
+                  );
                 })}
               </TableRow>
             ))}
@@ -271,14 +279,16 @@ export default function Page() {
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  onClick={() => router.push(`/home/scripts/${row.getValue("id")}`)}
+                  onClick={() =>
+                    router.push(`/home/scripts/${row.getValue("id")}`)
+                  }
                   className="cursor-pointer"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext()
+                        cell.getContext(),
                       )}
                     </TableCell>
                   ))}
@@ -322,5 +332,5 @@ export default function Page() {
         </div>
       </div> */}
     </div>
-  )
+  );
 }

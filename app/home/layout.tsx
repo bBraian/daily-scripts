@@ -2,20 +2,20 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "../globals.css";
 
-import { AppSidebar } from "@/components/app-sidebar"
-import { NavActions } from "@/components/nav-actions"
+import { AppSidebar } from "@/components/app-sidebar";
+import { NavActions } from "@/components/nav-actions";
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbList,
   BreadcrumbPage,
-} from "@/components/ui/breadcrumb"
-import { Separator } from "@/components/ui/separator"
+} from "@/components/ui/breadcrumb";
+import { Separator } from "@/components/ui/separator";
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
 
 const geistSans = localFont({
   src: "../fonts/GeistVF.woff",
@@ -42,7 +42,6 @@ export default function RootLayout({
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-
         <header className="flex h-14 shrink-0 items-center gap-2">
           <div className="flex flex-1 items-center gap-2 px-3">
             <SidebarTrigger />
@@ -61,7 +60,7 @@ export default function RootLayout({
             <NavActions />
           </div>
         </header>
-        
+
         {children}
       </SidebarInset>
     </SidebarProvider>
