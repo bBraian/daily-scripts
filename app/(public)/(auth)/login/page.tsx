@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import Link from "next/link";
+// import Link from "next/link";
 
 export default function Page({
   className,
@@ -37,12 +37,12 @@ export default function Page({
           Logar
         </Button>
       </div>
-      <div className="text-center text-sm">
+      {/* <div className="text-center text-sm">
         Não tem conta?{" "}
         <Link href="/auth/register" className="underline underline-offset-4">
           Registrar-se
         </Link>
-      </div>
+      </div> */}
     </form>
   );
 }
