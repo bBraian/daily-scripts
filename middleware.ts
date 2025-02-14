@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 
+import jwt from "jsonwebtoken";
+
 const publicRoutes = [
   { path: '/login', whenAuthenticated: 'redirect' },
   { path: '/register', whenAuthenticated: 'redirect' },
@@ -8,10 +10,12 @@ const publicRoutes = [
 
 const REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE = '/login'
 
+const JWT_SECRET = process.env.JWT_SECRET!;
+
 export function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const publicRoute = publicRoutes.find(route => route.path === path)
-  const authToken = request.cookies.get('token')
+  const authToken = request.cookies.get('token')?.value
 
   if(!authToken && publicRoute) {
     return NextResponse.next()
@@ -32,9 +36,12 @@ export function middleware(request: NextRequest) {
   }
 
   if(authToken && !publicRoute) {
-    //check JWT not expired
-
-    return NextResponse.next()
+    try {
+      jwt.verify(authToken, JWT_SECRET);
+      return NextResponse.next();
+    } catch (error) {
+      return NextResponse.json({ error: "Invalid token" }, { status: 403 });
+    }
   }
 
   return NextResponse.next()

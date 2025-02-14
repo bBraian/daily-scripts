@@ -1,25 +1,58 @@
+"use client";
+
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { FormEvent, useState } from "react";
+import api from "@/app/lib/axios";
+import { toast } from "sonner";
 // import Link from "next/link";
 
 export default function Page({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"form">) {
+  const [loading, setLoading] = useState(false);
+
+  async function handleLogin(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setLoading(true);
+
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+
+    try {
+      const { data } = await api.post("/auth/login", { email, password });
+      console.log(data);
+    } catch (error: any) {
+      toast.error("Falha no login", {
+        position: "top-center",
+        description: error.response?.data?.message || "Erro desconhecido",
+      });
+      console.error(error.response?.data?.message || error.response?.data);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
-    <form className={cn("flex flex-col gap-6", className)} {...props}>
+    <form
+      onSubmit={handleLogin}
+      className={cn("flex flex-col gap-6", className)}
+      {...props}
+    >
       <div className="flex flex-col items-center gap-2 text-center">
         <h1 className="text-2xl font-bold">Fazer Login</h1>
-        <p className="text-balance text-sm text-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           Digite seu e-mail e senha para fazer login
         </p>
       </div>
       <div className="grid gap-6">
         <div className="grid gap-2">
           <Label htmlFor="email">E-mail</Label>
-          <Input id="email" type="email" placeholder="m@example.com" required />
+          <Input id="email" name="email" type="email" required />
         </div>
         <div className="grid gap-2">
           <div className="flex items-center">
@@ -31,18 +64,12 @@ export default function Page({
               Esqueceu sua senha?
             </a>
           </div>
-          <Input id="password" type="password" required />
+          <Input id="password" name="password" type="password" required />
         </div>
-        <Button type="submit" className="w-full">
-          Logar
+        <Button type="submit" className="w-full" disabled={loading}>
+          {loading ? "Entrando..." : "Logar"}
         </Button>
       </div>
-      {/* <div className="text-center text-sm">
-        Não tem conta?{" "}
-        <Link href="/auth/register" className="underline underline-offset-4">
-          Registrar-se
-        </Link>
-      </div> */}
     </form>
   );
 }
