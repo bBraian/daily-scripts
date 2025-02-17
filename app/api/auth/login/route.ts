@@ -33,12 +33,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const token = jwt.sign({ userId: user.id, email: user.email }, SECRET, { expiresIn: "1h" });
+    const token = jwt.sign({ userId: user.id, email: user.email }, SECRET);
 
-    return NextResponse.json(
+    const response = NextResponse.json(
       { message: "Autenticado com sucesso", token },
       { status: 200 },
     );
+
+    return response
 
   } catch (error) {
     console.error("Error updating script:", error);

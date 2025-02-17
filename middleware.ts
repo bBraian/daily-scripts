@@ -10,12 +10,13 @@ const publicRoutes = [
 
 const REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE = '/login'
 
-const JWT_SECRET = process.env.JWT_SECRET!;
+const SECRET = process.env.JWT_SECRET || "your_secret_key";
 
 export function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const publicRoute = publicRoutes.find(route => route.path === path)
-  const authToken = request.cookies.get('token')?.value
+  const authHeader = request.headers.get("Authorization");
+  const authToken = authHeader?.startsWith("Bearer ") ? authHeader.split(" ")[1] : request.cookies.get("daily_scripts.accessToken")?.value;
 
   if(!authToken && publicRoute) {
     return NextResponse.next()
@@ -24,7 +25,6 @@ export function middleware(request: NextRequest) {
   if(!authToken && !publicRoute) {
     const redirectUrl = request.nextUrl.clone()
     redirectUrl.pathname = REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE
-
     return NextResponse.redirect(redirectUrl)
   }
 
@@ -37,14 +37,24 @@ export function middleware(request: NextRequest) {
 
   if(authToken && !publicRoute) {
     try {
-      jwt.verify(authToken, JWT_SECRET);
       return NextResponse.next();
     } catch (error) {
-      return NextResponse.json({ error: "Invalid token" }, { status: 403 });
+      return resetLogin(request);
     }
   }
 
   return NextResponse.next()
+}
+
+function resetLogin(request: NextRequest) {
+  const response = NextResponse.redirect(new URL("/login", request.url));
+
+  response.headers.append(
+    "Set-Cookie",
+    "daily_scripts.accessToken=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax"
+  );
+
+  return response;
 }
 
 export const config = {

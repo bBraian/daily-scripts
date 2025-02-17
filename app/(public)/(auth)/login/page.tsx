@@ -4,15 +4,18 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { FormEvent, useState } from "react";
+import { FormEvent, useContext, useState } from "react";
 import api from "@/app/lib/axios";
 import { toast } from "sonner";
-// import Link from "next/link";
+import { AuthContext } from "@/app/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 export default function Page({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"form">) {
+  const router = useRouter();
+  const { signIn } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
 
   async function handleLogin(e: FormEvent<HTMLFormElement>) {
@@ -25,13 +28,22 @@ export default function Page({
 
     try {
       const { data } = await api.post("/auth/login", { email, password });
-      console.log(data);
+      if (data.token) {
+        signIn(data.token)
+          .then(() => {
+            router.push("/");
+          })
+          .catch((e: any) => {
+            console.error(e);
+            toast.error("Erro ao fazer login");
+          });
+      }
     } catch (error: any) {
+      console.error(error);
       toast.error("Falha no login", {
         position: "top-center",
         description: error.response?.data?.message || "Erro desconhecido",
       });
-      console.error(error.response?.data?.message || error.response?.data);
     } finally {
       setLoading(false);
     }
