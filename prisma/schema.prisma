@@ -14,12 +14,23 @@ datasource db {
 }
 
 model User {
-  id       Int  @id @default(autoincrement())
-  username String 
-  email    String  @unique
-  password String
+  id         Int          @id @default(autoincrement())
+  username   String
+  email      String       @unique
+  password   String
+  Collection Collection[]
 
   @@map("users")
+}
+
+model Collection {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  userId Int
+  users  User @relation(fields: [userId], references: [id])
+
+  @@map("collections")
 }
 
 model Script {

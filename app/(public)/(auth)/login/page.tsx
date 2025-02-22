@@ -53,7 +53,6 @@ export default function Page({
     <form
       onSubmit={handleLogin}
       className={cn("flex flex-col gap-6", className)}
-      {...props}
     >
       <div className="flex flex-col items-center gap-2 text-center">
         <h1 className="text-2xl font-bold">Fazer Login</h1>

@@ -221,7 +221,7 @@ export default function Page() {
         />
         <div className="flex gap-2">
           <Button asChild variant="outline" className="ml-auto">
-            <Link href="/home/scripts/new">
+            <Link href="/scripts/new">
               Novo script <Plus />
             </Link>
           </Button>
@@ -279,9 +279,7 @@ export default function Page() {
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  onClick={() =>
-                    router.push(`/home/scripts/${row.getValue("id")}`)
-                  }
+                  onClick={() => router.push(`/scripts/${row.getValue("id")}`)}
                   className="cursor-pointer"
                 >
                   {row.getVisibleCells().map((cell) => (

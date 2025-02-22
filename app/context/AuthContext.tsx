@@ -7,16 +7,26 @@ import api from "../lib/axios";
 const AuthContext = createContext({} as any);
 const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
   const [user, setUser] = useState(null);
+  const [userCollections, setUserCollections] = useState(null);
+  const [activeUserCollection, setActiveUserCollection] = useState(null);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     async function initApp() {
       const { "daily_scripts.accessToken": access_token } = parseCookies();
-
       if (access_token) {
         api.defaults.headers["Authorization"] = `Bearer ${access_token}`;
         const userResponse = await getUser();
+        const userCollecionsResponse = await getUserCollections();
 
         setUser(userResponse);
+        setUserCollections(userCollecionsResponse);
+
+        const firstId =
+          userCollecionsResponse.length > 0
+            ? userCollecionsResponse[0].id
+            : null;
+        setActiveUserCollection(firstId);
+
         setLoading(false);
       }
       setLoading(false);
@@ -39,6 +49,16 @@ const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
       }
       setUser(userResponse);
 
+      const userCollecionsResponse = await getUserCollections();
+      if (!userCollecionsResponse) {
+        return false;
+      }
+      setUserCollections(userCollecionsResponse);
+
+      const firstId =
+        userCollecionsResponse.length > 0 ? userCollecionsResponse[0].id : null;
+      setActiveUserCollection(firstId);
+
       return true;
     } catch (error) {
       console.error(error);
@@ -48,6 +68,11 @@ const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
 
   async function getUser() {
     const { data } = await api.get("/user");
+    return data;
+  }
+
+  async function getUserCollections() {
+    const { data } = await api.get("/user/collections");
     return data;
   }
 
@@ -65,7 +90,10 @@ const AuthProvider = ({ children }: { children?: React.ReactNode }) => {
 
   const values = {
     user,
+    userCollections,
+    activeUserCollection,
     loading,
+    setActiveUserCollection,
     signIn,
     logout,
   };
